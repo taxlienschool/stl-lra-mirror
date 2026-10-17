@@ -1,0 +1,30 @@
+name: mirror
+on:
+  schedule:
+    - cron: "30 0 * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency: mirror
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build the mirror (fails, publishing nothing, if the CSV does not validate)
+        run: |
+          mkdir -p data && cp -r mirror/. data/ 2>/dev/null || true
+          node scripts/mirror.mjs
+      - name: Publish as a single orphan commit (history overwritten nightly)
+        run: |
+          rm -rf mirror && mkdir mirror && cp out/* mirror/
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout --orphan next
+          git rm -rq --cached . && git add README.md scripts .github mirror
+          git commit -qm "Mirror $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push -f origin next:main
