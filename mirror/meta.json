@@ -1,0 +1,32 @@
+{
+  "fetchedAt": "2026-10-24T04:49:38.133Z",
+  "csv": {
+    "url": "https://static.stlouis-mo.gov/open-data/SLDC/REAL-ESTATE/LRA_INVENTORY_AVAILABLE.csv",
+    "fetchedAt": "2026-10-24T04:49:38.133Z",
+    "rows": 9283,
+    "ids": 9282,
+    "bytes": 1775437,
+    "sha256": "e1ec618aa2e1aa92f8dc446d1f41d37e84099ddeefd516004a088e3bfda89eaf"
+  },
+  "values": {
+    "fetchedAt": "2026-10-24T04:49:38.133Z",
+    "count": 9282,
+    "bytes": 460352,
+    "sha256": "49a5c1ebcd58b38c8832c6bfc082033695123e94ac26d2c4e82e8b3e8efe337f"
+  },
+  "outlinesNew": {
+    "fetchedAt": "2026-10-24T04:49:38.133Z",
+    "count": 0,
+    "bytes": 2,
+    "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "asked": 1,
+    "requests": 1,
+    "error": null
+  },
+  "outlinesAll": {
+    "fetchedAt": "2026-10-24T04:49:38.133Z",
+    "count": 9281,
+    "bytes": 2796487,
+    "sha256": "ca2ac38f5fb0c28d5eaf0a7789db01553c16c4b0eb032a52867b31da33ba1980"
+  }
+}

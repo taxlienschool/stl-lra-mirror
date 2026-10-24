@@ -1,0 +1,50 @@
+name: mirror
+on:
+  schedule:
+    - cron: "30 0 * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency: mirror
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build the mirror (fails, publishing nothing, if the CSV does not validate)
+        run: |
+          set -euo pipefail
+          mkdir -p data
+          if [ -d mirror ]; then cp -r mirror/. data/; fi
+          node scripts/mirror.mjs
+      - name: Publish as a single orphan commit (history overwritten nightly)
+        run: |
+          set -euo pipefail
+          rm -rf mirror
+          mkdir mirror
+          cp out/* mirror/
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout --orphan next
+          # -f: the orphan index still holds last night's mirror, and without
+          # it git refuses the changed files (this silently re-published the
+          # 2026-10-14 copy every night until 2026-10-19).
+          git rm -rqf --cached .
+          git add README.md scripts .github mirror
+          git commit -qm "Mirror $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push -f origin next:main
+      - name: Verify the pushed meta.json is fresh (fails the job if not)
+        run: |
+          set -euo pipefail
+          git fetch -q origin main
+          git show origin/main:mirror/meta.json > /tmp/pushed-meta.json
+          node -e '
+            const m = JSON.parse(require("fs").readFileSync("/tmp/pushed-meta.json", "utf8"));
+            const age = (Date.now() - Date.parse(m.fetchedAt)) / 60000;
+            console.log(`pushed meta.json fetchedAt ${m.fetchedAt} (${age.toFixed(1)} min old)`);
+            if (!(age >= 0 && age <= 30)) { console.error("meta.json on main is not from this run"); process.exit(1); }
+          '
